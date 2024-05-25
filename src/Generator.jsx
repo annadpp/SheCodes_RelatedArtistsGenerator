@@ -1,28 +1,28 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import ArtistsForm from "./ArtistsForm";
+import ArtistsList from "./ArtistsList";
+import Loader from "./Loader";
 
-export default function Generator(props) {
+export default function Generator() {
   const [similarArtists, setSimilarArtists] = useState({
     ready: false,
     data: [],
   });
   const [artist, setArtist] = useState("");
-  const [loading, setLoading] = useState(false); // Inicialmente el loading está en false, porque no se ha hecho ninguna llamada a la API todavía
+  const [loading, setLoading] = useState(false);
 
   function handleResponse(response) {
-    console.log("Response from AI:", response.data.answer);
-    let data;
+    let dataResponse;
     try {
-      // Parse the response as JSON
-      data = JSON.parse(response.data.answer);
+      dataResponse = JSON.parse(response.data.answer);
     } catch (e) {
       console.error("Failed to parse response data:", e);
-      data = [];
+      dataResponse = [];
     }
 
-    // Check if data is an array
-    if (Array.isArray(data)) {
-      setSimilarArtists({ ready: true, data: data });
+    if (Array.isArray(dataResponse)) {
+      setSimilarArtists({ ready: true, data: dataResponse });
     } else {
       setSimilarArtists({ ready: true, data: null });
     }
@@ -36,42 +36,38 @@ export default function Generator(props) {
 
     let apiKey = "2046c535afeb092fo82f1d306d8a2b2t";
     let context = `You are a music expert and know many bands. Your mission is to generate a dictionary with the format [{"band": "", "style": ""}] using double quotes as per the user instructions. Please provide the information inside a dictionary as requested, without any additional instructions.`;
-    let prompt = `User instructions: Give me 6 bands similar to ${artist} following the context.`;
+    let prompt = `User instructions: Give me 6 bands similar to ${artist} following the context. Don't include the band I pass in your list.`;
     let apiUrl = `https://api.shecodes.io/ai/v1/generate?prompt=${prompt}&context=${context}&key=${apiKey}`;
 
     axios.get(apiUrl).then(handleResponse);
   }
 
+  function clearArtists() {
+    setSimilarArtists({
+      ready: false,
+      data: [],
+    });
+  }
+
+  //Used to clear the list if the artist input changes
+  useEffect(() => {
+    clearArtists();
+  }, [artist]);
+
   return (
     <div className="Generator">
-      <h1>Hello from generator</h1>
-      <form onSubmit={generateArtist}>
-        <input
-          type="text"
-          value={artist}
-          onChange={(e) => setArtist(e.target.value)}
-          placeholder="Enter an artist"
-        />
-        <button type="submit">Search similar artists</button>
-      </form>
+      <p>If you like...</p>
+      <ArtistsForm
+        artist={artist}
+        setArtist={setArtist}
+        generateArtist={generateArtist}
+        clearArtists={clearArtists}
+      />
       {loading ? (
-        "Loading..."
-      ) : similarArtists.ready ? (
-        <div>
-          {similarArtists.data ? (
-            similarArtists.data.map((item, index) => (
-              <div key={index}>
-                <ul>
-                  <li>{item.band}</li>
-                  <li>{item.style}</li>
-                </ul>
-              </div>
-            ))
-          ) : (
-            <p>There has been an error. Please, try again.</p>
-          )}
-        </div>
-      ) : null}
+        <Loader />
+      ) : (
+        <ArtistsList data={similarArtists.data} loading={loading} />
+      )}
     </div>
   );
 }
