@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import ArtistsForm from "./ArtistsForm";
 import ArtistsList from "./ArtistsList";
-import Loader from "./Loader";
 
 export default function Generator() {
   const [similarArtists, setSimilarArtists] = useState({
@@ -55,19 +54,38 @@ export default function Generator() {
   }, [artist]);
 
   return (
-    <div className="Generator">
-      <p>If you like...</p>
-      <ArtistsForm
-        artist={artist}
-        setArtist={setArtist}
-        generateArtist={generateArtist}
-        clearArtists={clearArtists}
-      />
-      {loading ? (
-        <Loader />
-      ) : (
+    <div className="generator container mx-auto h-[90vh] flex flex-col items-center justify-center ">
+      <div className="w-full sm:w-10/12 xl:w-5/6 h-2/6 bg-lime-green flex flex-col justify-center p-6 lg:p-20 2xl:p-36">
+        <p className="text-sm xl:text-md mb-7">If you like...</p>
+        <ArtistsForm
+          artist={artist}
+          setArtist={setArtist}
+          generateArtist={generateArtist}
+          clearArtists={clearArtists}
+        />
+      </div>
+      <div className="w-full sm:w-10/12 2xl:w-5/6 h-4/6 bg-black flex flex-col">
         <ArtistsList data={similarArtists.data} loading={loading} />
-      )}
+      </div>
+      <div>
+        <p className="text-[0.65rem] text-left mt-2">
+          Coded by{" "}
+          <a
+            href="https://www.linkedin.com/in/annadepablopuig/"
+            className="hover:line-through"
+          >
+            Anna de Pablo Puig
+          </a>
+          . Open-sourced in{" "}
+          <a
+            href="https://github.com/annadpp/SheCodes_RelatedArtistsGenerator"
+            className="hover:line-through"
+          >
+            GitHub
+          </a>
+          .
+        </p>
+      </div>
     </div>
   );
 }
